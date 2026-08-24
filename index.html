@@ -3,40 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ứng dụng Tạo Slide Bài Giảng</title>
+    <title>Trình Phát Bài Giảng - Slide Player</title>
     
-    <!-- Nhúng FontAwesome cho icon nút in -->
+    <!-- Nhúng Tailwind CSS để đồng bộ UI với quanly.html và xử lý nhanh màn hình Loading -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Nhúng FontAwesome cho icon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Nhúng MathJax (nếu bài giảng có công thức Toán học/Vật lý/Hóa học) -->
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <!-- Nhúng MathJax (Cho công thức Toán/Lý/Hóa/Thạch học) -->
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
-    <!-- Nhúng file CSS định dạng giao diện từ thư mục css -->
+    <!-- Nhúng file CSS định dạng khung Slide 16:9 và cấu hình in PDF -->
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body class="bg-slate-200 overflow-hidden"> 
+    <!-- Thêm overflow-hidden để màn hình không bị thanh cuộn khi trình chiếu -->
 
-    <!-- Nút in tài liệu -->
-    <button id="btn-print-doc" onclick="safePrint()" class="z-50">
+    <!-- ========================================== -->
+    <!-- 1. MÀN HÌNH CHỜ (LOADING SCREEN) -->
+    <!-- ========================================== -->
+    <div id="loading-screen" class="fixed inset-0 bg-slate-900 z-50 flex flex-col items-center justify-center text-white transition-opacity duration-500">
+        <i class="fas fa-circle-notch fa-spin text-5xl text-blue-500 mb-6"></i>
+        <h2 class="text-xl font-bold tracking-widest uppercase">Đang đồng bộ máy chủ...</h2>
+        <p class="text-slate-400 text-sm mt-3 flex items-center gap-2">
+            <i class="fas fa-database text-xs"></i> Đang tải dữ liệu bài giảng từ hệ thống
+        </p>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 2. NÚT IN TÀI LIỆU PDF -->
+    <!-- ========================================== -->
+    <button id="btn-print-doc" onclick="safePrint()" class="z-40" title="Xuất PDF">
         <i class="fas fa-print mr-2"></i> In Tài Liệu
     </button>
 
-    <!-- Vùng chứa toàn bộ các slide sẽ được JS render vào đây -->
+    <!-- ========================================== -->
+    <!-- 3. THANH ĐIỀU KHIỂN TRÌNH CHIẾU -->
+    <!-- ========================================== -->
+    <div id="slide-controls" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-40 bg-slate-900/85 backdrop-blur-sm px-6 py-3 rounded-full flex items-center gap-6 shadow-2xl border border-slate-700 print:hidden">
+        <button onclick="prevSlide()" class="text-white hover:text-blue-400 transition transform hover:scale-125 focus:outline-none" title="Trang trước (Mũi tên Trái)">
+            <i class="fas fa-chevron-left text-xl"></i>
+        </button>
+        
+        <!-- Bộ đếm trang được SlideDeck.js tự động cập nhật vào đây -->
+        <span id="page-counter" class="text-white font-bold text-sm tracking-widest font-mono min-w-[70px] text-center">
+            0 / 0
+        </span>
+        
+        <button onclick="nextSlide()" class="text-white hover:text-blue-400 transition transform hover:scale-125 focus:outline-none" title="Trang sau (Mũi tên Phải / Phím Cách)">
+            <i class="fas fa-chevron-right text-xl"></i>
+        </button>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 4. VÙNG CHỨA CÁC SLIDE (RENDER BỞI JS) -->
+    <!-- ========================================== -->
     <div id="presentation-container"></div>
 
     <!-- ========================================== -->
-    <!-- NHÚNG CÁC FILE JAVASCRIPT THEO THỨ TỰ TRONG TREE FOLDER -->
+    <!-- NHÚNG CÁC FILE JAVASCRIPT THEO ĐÚNG THỨ TỰ -->
     <!-- ========================================== -->
 
-    <!-- 1. Nhúng dữ liệu tĩnh trước (tách biệt nội dung và code logic) -->
-    <script src="js/data/lessonData.js"></script>
+    <!-- Bước 1: Công cụ tải dữ liệu API từ Google Apps Script -->
+    <script src="js/api.js"></script>
 
-    <!-- 2. Nhúng các class Models (Class OOP) -->
+    <!-- Bước 2: Khuôn mẫu Đối tượng (OOP) -->
     <script src="js/models/Slide.js"></script>
     <script src="js/models/SlideDeck.js"></script>
 
-    <!-- 3. Nhúng file chạy chính cuối cùng (khởi tạo app, bắt sự kiện click nút in...) -->
+    <!-- Bước 3: Tệp thực thi chính (đọc URL, điều phối mọi luồng) -->
     <script src="js/app.js"></script>
 
 </body>
