@@ -1,0 +1,164 @@
+/* ==========================================
+   1. CẤU HÌNH BIẾN MÀU SẮC & FONT CHỮ CHUNG
+   ========================================== */
+:root {
+    --bg-color: #f4f6f8;
+    --text-color: #333333;
+    --main-font: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --theme-color: #2c3e50;
+}
+
+body {
+    font-family: var(--main-font);
+    background-color: #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    margin: 0;
+}
+
+/* ==========================================
+   2. NÚT IN TÀI LIỆU CỐ ĐỊNH
+   ========================================== */
+#btn-print-doc {
+    position: fixed;
+    bottom: 20px; 
+    right: 20px; 
+    background-color: #111827; 
+    color: white; 
+    padding: 10px 20px; 
+    border-radius: 8px; 
+    border: none;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); 
+    cursor: pointer;
+    z-index: 50; 
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+#btn-print-doc:hover {
+    background-color: #374151; 
+}
+
+/* ==========================================
+   3. KHUNG CHỨA VÀ GIAO DIỆN TỪNG SLIDE
+   ========================================== */
+#presentation-container {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+/* Định dạng chung cho 1 Slide (Tỷ lệ 16:9) */
+.slide {
+    width: 960px;
+    height: 540px;
+    background-color: var(--bg-color);
+    background-image: radial-gradient(#d5d5d5 1px, transparent 1px); /* Họa tiết chấm bi */
+    background-size: 20px 20px;
+    position: relative;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+    box-sizing: border-box;
+    padding: 40px;
+    overflow: hidden;
+}
+
+/* Tiêu đề của slide */
+.slide-title {
+    font-size: 36px;
+    color: var(--theme-color);
+    font-weight: bold;
+    margin-bottom: 30px;
+    text-transform: uppercase;
+    border-bottom: 2px solid var(--theme-color);
+    padding-bottom: 10px;
+}
+
+/* Vùng chứa nội dung chữ và ảnh */
+.slide-body {
+    display: flex;
+    gap: 20px;
+    height: 350px;
+}
+
+/* Khung văn bản */
+.text-box {
+    flex: 1;
+    font-size: 22px;
+    color: var(--text-color);
+    line-height: 1.6;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 20px;
+    border: 1px dashed #95a5a6;
+    border-radius: 8px;
+}
+
+/* Khung hình ảnh */
+.image-box {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px solid var(--theme-color);
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #fff;
+}
+
+.image-box img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover;
+}
+
+/* Chân trang */
+.slide-footer {
+    position: absolute;
+    bottom: 15px;
+    left: 40px;
+    right: 40px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    color: #7f8c8d;
+    border-top: 1px solid #bdc3c7;
+    padding-top: 10px;
+}
+
+/* ==========================================
+   4. CẤU HÌNH CSS ĐỂ IN RA PDF (QUAN TRỌNG)
+   ========================================== */
+@media print {
+    @page {
+        size: 960px 540px; /* Ép kích thước trang khi in khớp với slide (16:9) */
+        margin: 0;         /* Xóa lề mặc định của giấy */
+    }
+
+    body {
+        background-color: white; /* Xóa màu nền xám của web để in sạch sẽ */
+        padding: 0;
+    }
+
+    /* Ẩn nút in khi đang xuất PDF */
+    #btn-print-doc {
+        display: none !important;
+    }
+
+    /* Cấu hình hiển thị của từng slide khi in */
+    .slide {
+        margin: 0;
+        box-shadow: none; /* Bỏ đổ bóng để PDF sạch sẽ */
+        page-break-after: always; /* Bắt buộc ngắt trang sau mỗi slide */
+        break-after: page;
+        
+        /* Ép trình duyệt in background-color và họa tiết lưới */
+        -webkit-print-color-adjust: exact !important; 
+        print-color-adjust: exact !important;
+    }
+
+    /* Ẩn vùng khoảng trống (gap) giữa các slide khi in */
+    #presentation-container {
+        gap: 0; 
+    }
+}
