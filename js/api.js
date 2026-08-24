@@ -8,7 +8,7 @@
 const API_CONFIG = {
     // THAY THẾ ĐƯỜNG LINK DƯỚI ĐÂY BẰNG URL WEB APP CỦA BẠN (Lấy từ Google Apps Script sau khi Deploy)
     // Ví dụ: "https://script.google.com/macros/s/AKfycb.../exec"
-    BASE_URL: "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE" 
+    BASE_URL: "https://script.google.com/macros/s/AKfycbwj9U_4bDiVWbU1489q_wh8y06KlNKaXPjK46uMg7itUQ6NdCA_cAixtiz_WGfzm0lf/exec" 
 };
 
 const SlideAPI = {
