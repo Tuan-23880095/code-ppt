@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ứng dụng Tạo Slide Bài Giảng</title>
+    
+    <!-- Nhúng FontAwesome cho icon nút in -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Nhúng MathJax (nếu bài giảng có công thức Toán học/Vật lý/Hóa học) -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <!-- Nhúng file CSS định dạng giao diện từ thư mục css -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- Nút in tài liệu -->
+    <button id="btn-print-doc" onclick="safePrint()" class="z-50">
+        <i class="fas fa-print mr-2"></i> In Tài Liệu
+    </button>
+
+    <!-- Vùng chứa toàn bộ các slide sẽ được JS render vào đây -->
+    <div id="presentation-container"></div>
+
+    <!-- ========================================== -->
+    <!-- NHÚNG CÁC FILE JAVASCRIPT THEO THỨ TỰ TRONG TREE FOLDER -->
+    <!-- ========================================== -->
+
+    <!-- 1. Nhúng dữ liệu tĩnh trước (tách biệt nội dung và code logic) -->
+    <script src="js/data/lessonData.js"></script>
+
+    <!-- 2. Nhúng các class Models (Class OOP) -->
+    <script src="js/models/Slide.js"></script>
+    <script src="js/models/SlideDeck.js"></script>
+
+    <!-- 3. Nhúng file chạy chính cuối cùng (khởi tạo app, bắt sự kiện click nút in...) -->
+    <script src="js/app.js"></script>
+
+</body>
+</html>
