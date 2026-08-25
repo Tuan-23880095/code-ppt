@@ -45,8 +45,10 @@
                         Nhóm kỹ năng & Học tập (BAA00008)
                     </h3>
                 </div>
-                <!-- Div rỗng để vòng lặp JS nhồi dữ liệu vào -->
-                <div id="list-kynang" class="p-6 space-y-4"></div>
+                <div id="list-kynang" class="p-6 space-y-4">
+                    <!-- Trạng thái chờ -->
+                    <div class="text-center text-slate-400 py-4"><i class="fas fa-spinner fa-spin mr-2"></i> Đang tải dữ liệu...</div>
+                </div>
             </div>
 
             <!-- KHU VỰC 2: CHUYÊN NGÀNH ĐỊA CHẤT -->
@@ -57,72 +59,79 @@
                         Chuyên ngành Địa chất
                     </h3>
                 </div>
-                <!-- Div rỗng để vòng lặp JS nhồi dữ liệu vào -->
-                <div id="list-diachat" class="p-6 space-y-4"></div>
+                <div id="list-diachat" class="p-6 space-y-4">
+                    <!-- Trạng thái chờ -->
+                    <div class="text-center text-slate-400 py-4"><i class="fas fa-spinner fa-spin mr-2"></i> Đang tải dữ liệu...</div>
+                </div>
             </div>
 
         </div>
     </main>
 
-    <!-- KỊCH BẢN JAVASCRIPT: VÒNG LẶP RENDER DỮ LIỆU -->
+    <!-- KẾT NỐI API & XỬ LÝ GIAO DIỆN -->
+    <!-- Gọi class GoogleSheetAPI từ file js của bạn -->
+    <script src="js/api.js"></script> 
+    
     <script>
-        // 1. MẢNG DỮ LIỆU BÀI GIẢNG (Khai báo tại đây)
-        // Khi có bài mới, bạn chỉ cần copy 1 dòng và đổi tên sheetName (tên Tab Google Sheets)
-        const lessonData = [
-            // CÁC BÀI THUỘC NHÓM KỸ NĂNG
-            { sheetName: "BAA00008-Tuan1", title: "Tuần 1: Kỹ năng giao tiếp cơ bản", desc: "Dành cho sinh viên năm nhất", category: "kynang", theme: "indigo" },
-            { sheetName: "BAA00008-Tuan2", title: "Tuần 2: Xây dựng nhóm hiệu quả", desc: "Giao tiếp & Giải quyết xung đột", category: "kynang", theme: "indigo" },
-            { sheetName: "BAA00008-Tuan3", title: "Tuần 3: Trình bày thuyết phục", desc: "Kỹ năng nói trước đám đông", category: "kynang", theme: "indigo" },
-            
-            // CÁC BÀI THUỘC CHUYÊN NGÀNH ĐỊA CHẤT
-            { sheetName: "DC-MoiTruongTramTich", title: "Môi trường Trầm tích", desc: "Đặc điểm thạch học & Tiến hóa", category: "diachat", theme: "emerald" },
-            { sheetName: "DC-PhucHeKhamDuc", title: "Tiến hóa phức hệ Khâm Đức", desc: "Báo cáo tiến độ dự án NCKH", category: "diachat", theme: "emerald" },
-            { sheetName: "DC-ThachHocDaTramTich", title: "Thạch học đá Trầm tích", desc: "Phân loại và cấu tạo", category: "diachat", theme: "emerald" }
-        ];
-
-        // 2. HÀM TẠO GIAO DIỆN MỘT NÚT BẤM (Dùng chung cho cả vòng lặp)
-        function createLessonCard(item, index) {
+        // Hàm tạo HTML cho từng dòng bài giảng
+        function createLessonCard(item, index, theme) {
             return `
-                <div class="flex items-center justify-between p-4 rounded-xl border border-slate-100 bg-slate-50 hover:bg-${item.theme}-50/50 hover:border-${item.theme}-200 transition-colors group">
+                <div class="flex items-center justify-between p-4 rounded-xl border border-slate-100 bg-slate-50 hover:bg-${theme}-50/50 hover:border-${theme}-200 transition-colors group">
                     <div class="flex items-start space-x-3">
-                        <div class="mt-1 w-8 h-8 rounded-full bg-${item.theme}-100 text-${item.theme}-600 flex items-center justify-center font-bold text-sm shrink-0">
-                            ${index + 1}
+                        <div class="mt-1 w-8 h-8 rounded-full bg-${theme}-100 text-${theme}-600 flex items-center justify-center font-bold text-sm shrink-0">
+                            ${index}
                         </div>
                         <div>
-                            <h4 class="font-bold text-slate-800 group-hover:text-${item.theme}-700 transition-colors">${item.title}</h4>
+                            <h4 class="font-bold text-slate-800 group-hover:text-${theme}-700 transition-colors">${item.title}</h4>
                             <p class="text-xs text-slate-500 mt-1">${item.desc}</p>
                         </div>
                     </div>
-                    <a href="index.html?lesson=${item.sheetName}" target="_blank" class="shrink-0 px-4 py-2 bg-${item.theme}-600 hover:bg-${item.theme}-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-transform active:scale-95">
+                    <!-- Quan trọng: Gắn id vào URL để trang ppt.html biết cần mở bài nào -->
+                    <a href="ppt.html?id=${item.id}" target="_blank" class="shrink-0 px-4 py-2 bg-${theme}-600 hover:bg-${theme}-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-transform active:scale-95">
                         <i class="fas fa-play mr-1"></i> Mở Slide
                     </a>
                 </div>
             `;
         }
 
-        // 3. VÒNG LẶP RENDER DỮ LIỆU VÀO ĐÚNG KHU VỰC
-        document.addEventListener('DOMContentLoaded', () => {
-            let kynangHtml = '';
-            let diachatHtml = '';
-            
-            // Đếm số thứ tự riêng cho từng nhóm
-            let indexKyNang = 0;
-            let indexDiaChat = 0;
+        // Tải và render dữ liệu khi trang vừa mở lên
+        document.addEventListener('DOMContentLoaded', async () => {
+            const kynangContainer = document.getElementById('list-kynang');
+            const diachatContainer = document.getElementById('list-diachat');
 
-            // Vòng lặp quét qua toàn bộ mảng dữ liệu
-            lessonData.forEach(item => {
-                if (item.category === "kynang") {
-                    kynangHtml += createLessonCard(item, indexKyNang);
-                    indexKyNang++;
-                } else if (item.category === "diachat") {
-                    diachatHtml += createLessonCard(item, indexDiaChat);
-                    indexDiaChat++;
+            try {
+                // apiInstance được khởi tạo trong js/api.js
+                const data = await apiInstance.getMenu();
+                
+                // Xóa trạng thái "Đang tải dữ liệu..."
+                kynangContainer.innerHTML = '';
+                diachatContainer.innerHTML = '';
+                
+                let indexKyNang = 1;
+                let indexDiaChat = 1;
+
+                // Phân loại và in ra màn hình
+                data.forEach(item => {
+                    if (item.category === "kynang") {
+                        kynangContainer.innerHTML += createLessonCard(item, indexKyNang++, "indigo");
+                    } else if (item.category === "diachat") {
+                        diachatContainer.innerHTML += createLessonCard(item, indexDiaChat++, "emerald");
+                    }
+                });
+
+                // Nếu nhóm nào không có dữ liệu, hiển thị thông báo trống
+                if (kynangContainer.innerHTML === '') {
+                    kynangContainer.innerHTML = '<p class="text-sm text-slate-500 text-center">Chưa có bài giảng kỹ năng.</p>';
                 }
-            });
+                if (diachatContainer.innerHTML === '') {
+                    diachatContainer.innerHTML = '<p class="text-sm text-slate-500 text-center">Chưa có bài giảng chuyên ngành.</p>';
+                }
 
-            // Đổ HTML đã tạo vào giao diện
-            document.getElementById('list-kynang').innerHTML = kynangHtml;
-            document.getElementById('list-diachat').innerHTML = diachatHtml;
+            } catch (error) {
+                console.error("Lỗi:", error);
+                kynangContainer.innerHTML = '<p class="text-sm text-red-500 text-center">Lỗi kết nối máy chủ Google Sheets.</p>';
+                diachatContainer.innerHTML = '<p class="text-sm text-red-500 text-center">Lỗi kết nối máy chủ Google Sheets.</p>';
+            }
         });
     </script>
 </body>
