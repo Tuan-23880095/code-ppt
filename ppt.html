@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trình Chiếu Bài Giảng</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Định nghĩa màu chủ đạo cho các thẻ HTML được tạo từ Apps Script */
+        :root {
+            --theme-color: #2563eb; /* Màu xanh dương blue-600 */
+            --text-color: #334155; 
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        /* Chỉnh CSS cho nội dung inject từ Google Sheets */
+        .slide-content h3 { font-size: 1.5rem; }
+        .slide-content ul { list-style-type: disc; padding-left: 2rem; }
+        .slide-content li { margin-bottom: 0.5rem; font-size: 1.125rem; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col items-center justify-center p-4">
+
+    <!-- Khu vực khung Slide -->
+    <main class="w-full max-w-5xl bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col" style="height: 80vh;">
+        
+        <!-- Header Slide -->
+        <header class="bg-slate-50 border-b border-slate-200 px-8 py-4 flex justify-between items-center shrink-0">
+            <div>
+                <h1 id="lesson-name" class="text-2xl font-bold text-slate-800">Đang tải tựa đề...</h1>
+                <p id="author-name" class="text-sm font-semibold text-blue-600 uppercase tracking-wider mt-1">Đang tải tác giả...</p>
+            </div>
+            <a href="quanly.html" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm font-semibold rounded-lg transition-colors">
+                <i class="fas fa-home mr-1"></i> Về Menu
+            </a>
+        </header>
+
+        <!-- Nội dung Slide -->
+        <div id="slide-display" class="p-8 flex-grow overflow-y-auto flex flex-col justify-center">
+            <div class="text-center text-slate-400 py-10">
+                <i class="fas fa-spinner fa-spin text-4xl mb-4"></i>
+                <p>Đang đồng bộ dữ liệu từ Google Sheets...</p>
+            </div>
+        </div>
+
+        <!-- Thanh điều khiển -->
+        <footer class="bg-slate-800 px-8 py-4 flex justify-between items-center shrink-0 text-white">
+            <button id="btn-prev" onclick="app.prev()" class="px-5 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                <i class="fas fa-chevron-left mr-2"></i> Trước
+            </button>
+            <div class="font-semibold" id="slide-counter">Slide 0 / 0</div>
+            <button id="btn-next" onclick="app.next()" class="px-5 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                Sau <i class="fas fa-chevron-right ml-2"></i>
+            </button>
+        </footer>
+    </main>
+
+    <script>
+        class PresentationApp {
+            constructor() {
+                this.slides = [];
+                this.currentIndex = 0;
+                // THAY THẾ LINK WEB APP CỦA BẠN VÀO ĐÂY
+                this.scriptUrl = 'YOUR_GOOGLE_SCRIPT_WEB_APP_URL';
+            }
+
+            async init() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const lessonParam = urlParams.get('lesson'); // Khớp với e.parameter.lesson
+
+                if (!lessonParam) {
+                    document.getElementById('slide-display').innerHTML = '<p class="text-red-500 text-center font-bold">Lỗi: Không tìm thấy tham số bài học (?lesson=...).</p>';
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`${this.scriptUrl}?lesson=${lessonParam}`);
+                    const jsonResult = await response.json();
+
+                    if (jsonResult.error) {
+                        document.getElementById('slide-display').innerHTML = `<p class="text-red-500 text-center">${jsonResult.error}</p>`;
+                        return;
+                    }
+
+                    // Cập nhật thông tin tác giả và môn học từ backend
+                    document.getElementById('author-name').innerText = jsonResult.config.author;
+                    document.getElementById('lesson-name').innerText = jsonResult.config.lessonName;
+                    
+                    this.slides = jsonResult.data;
+                    this.renderSlide(0);
+
+                } catch (error) {
+                    console.error("Lỗi API:", error);
+                    document.getElementById('slide-display').innerHTML = '<p class="text-red-500 text-center">Lỗi kết nối đến máy chủ Google.</p>';
+                }
+            }
+
+            renderSlide(index) {
+                if (!this.slides || this.slides.length === 0) return;
+                
+                this.currentIndex = index;
+                const slide = this.slides[index];
+                
+                // Cấu trúc HTML in ra dựa vào nội dung HTML đã đóng gói sẵn từ backend
+                document.getElementById('slide-display').innerHTML = `
+                    <div class="w-full max-w-4xl mx-auto flex flex-col md:flex-row gap-8 items-center">
+                        <div class="flex-1 w-full">
+                            <h2 class="text-4xl font-extrabold text-slate-900 mb-6 border-b-2 border-blue-500 pb-2 inline-block">${slide.title}</h2>
+                            <div class="slide-content text-slate-700 leading-relaxed">
+                                ${slide.content}
+                            </div>
+                        </div>
+                        ${slide.imageUrl ? `
+                        <div class="flex-1 w-full flex justify-center">
+                            <img src="${slide.imageUrl}" alt="Minh họa" class="max-h-80 rounded-xl shadow-lg border border-slate-200 object-contain">
+                        </div>` : ''}
+                    </div>
+                `;
+
+                // Cập nhật trạng thái nút bấm
+                document.getElementById('slide-counter').innerText = `Slide ${index + 1} / ${this.slides.length}`;
+                document.getElementById('btn-prev').disabled = (index === 0);
+                document.getElementById('btn-next').disabled = (index === this.slides.length - 1);
+            }
+
+            prev() { if (this.currentIndex > 0) this.renderSlide(this.currentIndex - 1); }
+            next() { if (this.currentIndex < this.slides.length - 1) this.renderSlide(this.currentIndex + 1); }
+        }
+
+        // Khởi động ứng dụng
+        const app = new PresentationApp();
+        document.addEventListener('DOMContentLoaded', () => app.init());
+    </script>
+</body>
+</html>
